@@ -1,0 +1,36 @@
+# Standalone extension: the worker-thread POOL — a thin, platform-agnostic
+# composition on the threading PRIMITIVE (the concern). This is the "give me a
+# pool of workers and a batch barrier" layer the application links against; the
+# primitive (opaque thread handle + the hardware facts) is the concern it
+# requires, and the jobs system (per-job handles, dependencies, priorities) is
+# a later optional layer on top (backlog 0038).
+#
+# It is a STANDALONE (kind = "standalone"), not a concern: the pool's LOGIC
+# (the FIFO queue + the batch barrier + the auto-sizing) is platform-agnostic —
+# it builds on the platform-varying primitive (Thread_Create/Thread_Join + the
+# hardware facts), so there is no capability-level platform variation to model
+# as an interface/implementation split. A single source serves every platform;
+# the only platform branch is the barrier's wait strategy (block on native,
+# spin on the web main thread, which cannot block).
+#
+# Sizing: PoolCreate(n) with n <= 0 (auto) sizes to the hardware's PHYSICAL
+# core count (Thread_Count_Physical — exact on native, an honest estimate on
+# web), clamped to the concurrency ceiling (Thread_Concurrency). n > 0 is an
+# explicit override, clamped to the ceiling. A ceiling of 0 (threading_none, or
+# an Emscripten page without SharedArrayBuffer) degrades the pool to SERIAL
+# (jobs run inline on the submitting thread, no workers) — the degradation is
+# keyed off the primitive's concurrency fact, so the pool stays
+# platform-agnostic.
+#
+format_version = 1
+name   = "thread_pool"
+kind   = "standalone"
+version        = "1.0.0"
+requires = [
+  { package = "threading", window = "1.0.0" },
+  { package = "memory", window = "1.1.0" },
+  { package = "logging", window = "1.1.0" },
+]
+# The contract renderings this package ships (the dialect-table membership
+# fact; the cradle is the cross-check, a drift is a named refusal).
+renderings = ["static", "dynamic"]
