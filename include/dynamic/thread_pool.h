@@ -22,14 +22,25 @@ static inline CruxThreadPool *ThreadPool_Create(int workerCount) {
 static inline void ThreadPool_Destroy(CruxThreadPool *pool) {
   ((ThreadPoolAPI *)crux_engine_api->GetExtensionAPI(PACKAGE_THREAD_POOL))->Destroy(pool);
 }
-static inline void ThreadPool_Submit(CruxThreadPool *pool, void (*fn)(void *arg), void *arg) {
-  ((ThreadPoolAPI *)crux_engine_api->GetExtensionAPI(PACKAGE_THREAD_POOL))->Submit(pool, fn, arg);
+static inline void ThreadPool_Submit(CruxThreadPool *pool, void (*func)(void *arg), void *arg) {
+  ((ThreadPoolAPI *)crux_engine_api->GetExtensionAPI(PACKAGE_THREAD_POOL))->Submit(pool, func, arg);
 }
 static inline void ThreadPool_WaitAll(CruxThreadPool *pool) {
   ((ThreadPoolAPI *)crux_engine_api->GetExtensionAPI(PACKAGE_THREAD_POOL))->WaitAll(pool);
 }
 static inline int ThreadPool_WorkerCount(CruxThreadPool *pool) {
   return ((ThreadPoolAPI *)crux_engine_api->GetExtensionAPI(PACKAGE_THREAD_POOL))->WorkerCount(pool);
+}
+// (v2, backlog 0039) the batch-dispatch additions.
+static inline void ThreadPool_SetMode(CruxThreadPool *pool, TPMode mode) {
+  ((ThreadPoolAPI *)crux_engine_api->GetExtensionAPI(PACKAGE_THREAD_POOL))->SetMode(pool, mode);
+}
+static inline void ThreadPool_SubmitSlot(CruxThreadPool *pool, int slot, void (*func)(void *arg), void *arg) {
+  ((ThreadPoolAPI *)crux_engine_api->GetExtensionAPI(PACKAGE_THREAD_POOL))->SubmitSlot(pool, slot, func, arg);
+}
+static inline CruxThreadPool *ThreadPool_CreateWithAllocator(int workerCount, const TPAllocator *allocator) {
+  return ((ThreadPoolAPI *)crux_engine_api->GetExtensionAPI(PACKAGE_THREAD_POOL))
+      ->CreateWithAllocator(workerCount, allocator);
 }
 
 #ifdef __cplusplus
